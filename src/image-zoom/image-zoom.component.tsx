@@ -4,12 +4,10 @@ import {
     LayoutChangeEvent,
     PanResponder,
     PanResponderInstance,
-    Platform,
-    PlatformOSType,
     StyleSheet,
     View
 } from 'react-native';
-import { Moving } from '../moving/moving';
+import { MultiFingerDrag } from '../multi-finger-drag/multi-finger-drag';
 import styles from './image-zoom.style';
 import { ICenterOn, Props, State } from './image-zoom.type';
 
@@ -21,7 +19,7 @@ export default class ImageViewer extends React.Component<Props, State> {
     private lastPositionX: number | null = null;
     private positionX = 0;
     private lastPosition = [
-        { x: 0, y: 0 },
+        { x: 0, y: 1 },
         { x: 0, y: 0 }
     ];
     private animatedPositionX = new Animated.Value(0);
@@ -202,22 +200,15 @@ export default class ImageViewer extends React.Component<Props, State> {
                     const firstFinderCurrent = { x: pageX1, y: pageY1 };
                     const secondFinderCurrent = { x: pageX2, y: pageY2 };
 
-                    const isMovingMode = Moving.isTrue(
+                    const isMovingMode = MultiFingerDrag.isActive(
                         this.lastPosition[0],
                         firstFinderCurrent,
                         this.lastPosition[1],
                         secondFinderCurrent
                     );
 
-                    const array = [
-                        this.lastPosition[0],
-                        firstFinderCurrent,
-                        this.lastPosition[1],
-                        secondFinderCurrent
-                    ];
-
                     // tslint:disable-next-line:no-console
-                    console.log({ array, isMovingMode });
+                    console.log({ isMovingMode });
 
                     this.lastPosition = [firstFinderCurrent, secondFinderCurrent];
                 }

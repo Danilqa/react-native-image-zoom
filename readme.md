@@ -1,3 +1,20 @@
+## Before you start
+
+This is a fork of react-native-image-pan-zoom library. The goal of fork is adding new feature: \
+Moving through image using 2 fingers (multi-fingers touch gesture)
+
+To start development:
+1. `yarn install` on root folder
+2. `npm start` to run listener for ts file changes
+3. `yarn install` in the `demo` folder
+4. Run project of the `demo` folder on your target platform
+5. Enjoy development
+
+##
+TODO:
+1. Move all code base to project code-style
+2. Write specs for image-zoom component
+
 ## Show Cases
 
 > Zoom while sliding

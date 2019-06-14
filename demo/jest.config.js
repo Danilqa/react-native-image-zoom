@@ -1,7 +1,7 @@
 module.exports = {
     clearMocks: true,
     testMatch: [
-        '<rootDir>/src/**/*.spec.(ts|tsx)'
+        '<rootDir>/src/**/*.spec.(js|jsx)'
     ],
     // This configuration is used to defeat the problem:
     //  jest-haste-map: @providesModule naming collision:
@@ -14,23 +14,16 @@ module.exports = {
     ],
     testURL: 'http://localhost',
     transform: {
-        '^(?!.*\\.(js|ts|tsx|css|json)$)': '<rootDir>/config/jest/transform/file.transform.js',
-        '^.+\\.tsx?$': '<rootDir>/config/jest/transform/typescript.transform.js'
+        '^(?!.*\\.(js|css|json)$)': '<rootDir>/config/jest/transform/file.transform.js',
+        '^.+\\.css$': '<rootDir>/config/jest/transform/css.transform.js'
     },
     moduleFileExtensions: [
-        'web.ts',
         'ts',
-        'tsx',
         'web.js',
         'js',
         'json',
         'node'
     ],
-    globals: {
-        'ts-jest': {
-            tsConfig: 'tsconfig.spec.json'
-        }
-    },
     coverageThreshold: {
         global: {
             branches: 100,
