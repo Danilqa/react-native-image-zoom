@@ -14,12 +14,36 @@ export class MultiFingerDrag {
         const delta1 = getDiff(prev1, current1);
         const delta2 = getDiff(prev2, current2);
 
+        // tslint:disable-next-line:no-console
+        console.log({ delta1, delta2 });
+
         const quadrantPlanes1 = getPossibleQuadrantPlanes(delta1);
         const quadrantPlanes2 = getPossibleQuadrantPlanes(delta2);
 
         // TS doesn't understand that this is an array
         // @ts-ignore
         return quadrantPlanes1.some(plane => quadrantPlanes2.includes(plane));
+    }
+
+    public static getCenter(pointA: IPoint, pointB: IPoint): IPoint {
+        const { getDiff } = MultiFingerDrag;
+
+        let { x, y } = getDiff(pointA, pointB);
+
+        x = Math.abs(x);
+        y = Math.abs(y);
+
+        return { x, y };
+    }
+
+    public static getDiff(pointA: IPoint, pointB: IPoint): IPoint {
+        const { x: xa, y: ya } = pointA;
+        const { x: xb, y: yb } = pointB;
+
+        const x = xb - xa;
+        const y = yb - ya;
+
+        return { x, y };
     }
 
     private static getPossibleQuadrantPlanes(point: IPoint): quadrantPlane[] {
@@ -59,16 +83,6 @@ export class MultiFingerDrag {
         } else {
             return 0;
         }
-    }
-
-    private static getDiff(pointA: IPoint, pointB: IPoint): IPoint {
-        const { x: xa, y: ya } = pointA;
-        const { x: xb, y: yb } = pointB;
-
-        const x = xb - xa;
-        const y = yb - ya;
-
-        return { x, y };
     }
 
     private static isNegativeOrNull(n: number): boolean {

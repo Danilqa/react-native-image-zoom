@@ -3,7 +3,7 @@ import { IPoint, MultiFingerDrag } from './multi-finger-drag';
 describe('MultiFingerDrag', () => {
     // We need to write specification about inner methods
     // @ts-ignore
-    const { isActive, getQuadrantPlane, getDiff } = MultiFingerDrag;
+    const { isActive, getQuadrantPlane, getDiff, getCenter } = MultiFingerDrag;
 
     it('should return diff of two points', () => {
         const pointA = { x: 10, y: -5 } as IPoint;
@@ -12,6 +12,15 @@ describe('MultiFingerDrag', () => {
         const actual = getDiff(pointA, pointB);
 
         expect(actual).toEqual({ x: 1, y: -2 });
+    });
+
+    it('should return center of 2 points', () => {
+        const pointA = { x: 15, y: 5 } as IPoint;
+        const pointB = { x: 2, y: 7 } as IPoint;
+
+        const actual = getCenter(pointA, pointB);
+
+        expect(actual).toEqual({ x: 13, y: 2 });
     });
 
     it('should return true if vectors are align', () => {

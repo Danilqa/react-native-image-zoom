@@ -44,6 +44,8 @@ export default class ImageViewer extends React.Component<Props, State> {
     // 滑动过程中，整体横向过界偏移量
     private horizontalWholeOuterCounter = 0;
 
+    private tick = 0;
+
     // 滑动过程中，swipeDown 偏移量
     private swipeDownOffset = 0;
 
@@ -76,6 +78,9 @@ export default class ImageViewer extends React.Component<Props, State> {
 
     // 是否在左右滑
     private isHorizontalWrap = false;
+
+    private isMovingMode: boolean | null = null;
+    private isPinchToZoomMode: boolean | null = null;
 
     public componentWillMount() {
         this.imagePanResponder = PanResponder.create({
@@ -193,6 +198,10 @@ export default class ImageViewer extends React.Component<Props, State> {
                 }
 
                 if (evt.nativeEvent.changedTouches.length === 2) {
+                    // tslint:disable-next-line:no-console
+                    this.tick += 1;
+                    // tslint:disable-next-line:no-console
+                    console.log({ isMoving: this.isMovingMode, pitchToZoom: this.isPinchToZoomMode });
                     const [firstFinger, secondFinger] = evt.nativeEvent.changedTouches;
                     const { pageX: pageX1, pageY: pageY1 } = firstFinger;
                     const { pageX: pageX2, pageY: pageY2 } = secondFinger;
@@ -200,44 +209,33 @@ export default class ImageViewer extends React.Component<Props, State> {
                     const firstFinderCurrent = { x: pageX1, y: pageY1 };
                     const secondFinderCurrent = { x: pageX2, y: pageY2 };
 
-                    const isMovingMode = MultiFingerDrag.isActive(
-                        this.lastPosition[0],
-                        firstFinderCurrent,
-                        this.lastPosition[1],
-                        secondFinderCurrent
-                    );
+                    const centerPointPrevious = MultiFingerDrag.getCenter(this.lastPosition[0], this.lastPosition[1]);
+                    const centerPointCurrent = MultiFingerDrag.getCenter(firstFinderCurrent, secondFinderCurrent);
+                    const diff = MultiFingerDrag.getDiff(centerPointPrevious, centerPointCurrent);
+
+                    // tslint:disable-next-line:prefer-const
+                    let {x: diffX, y: diffY} = diff;
 
                     // tslint:disable-next-line:no-console
-                    console.log({ isMovingMode });
+                    console.log({tick: this.tick, lastPosition: this.lastPosition});
+                    if (this.tick === 2 && this.isMovingMode === null && this.isPinchToZoomMode === null) {
+                        const isMovingMode = MultiFingerDrag.isActive(
+                            this.lastPosition[0],
+                            firstFinderCurrent,
+                            this.lastPosition[1],
+                            secondFinderCurrent
+                        );
 
-                    this.lastPosition = [firstFinderCurrent, secondFinderCurrent];
-                }
-
-                if (evt.nativeEvent.changedTouches.length <= 1) {
-                    // x 位移00
-                    let diffX = gestureState.dx - (this.lastPositionX || 0);
-                    if (this.lastPositionX === null) {
-                        diffX = 0;
-                    }
-                    // y 位移
-                    let diffY = gestureState.dy - (this.lastPositionY || 0);
-                    if (this.lastPositionY === null) {
-                        diffY = 0;
-                    }
-
-                    // 保留这一次位移作为下次的上一次位移
-                    this.lastPositionX = gestureState.dx;
-                    this.lastPositionY = gestureState.dy;
-
-                    this.horizontalWholeCounter += diffX;
-                    this.verticalWholeCounter += diffY;
-
-                    if (Math.abs(this.horizontalWholeCounter) > 5 || Math.abs(this.verticalWholeCounter) > 5) {
-                        // 如果位移超出手指范围，取消长按监听
-                        clearTimeout(this.longPressTimeout);
+                        if (isMovingMode) {
+                            this.isMovingMode = true;
+                            this.isPinchToZoomMode = false;
+                        } else {
+                            this.isMovingMode = false;
+                            this.isPinchToZoomMode = true;
+                        }
                     }
 
-                    if (this.props.panToMove) {
+                    if (this.isMovingMode) {
                         // 处理左右滑，如果正在 swipeDown，左右滑失效
                         if (this.swipeDownOffset === 0) {
                             if (Math.abs(diffX) > Math.abs(diffY)) {
@@ -375,14 +373,13 @@ export default class ImageViewer extends React.Component<Props, State> {
                             }
                         }
                     }
-                } else {
-                    // 多个手指的情况
-                    // 取消长按状态
-                    if (this.longPressTimeout) {
-                        clearTimeout(this.longPressTimeout);
-                    }
+                    if (this.isPinchToZoomMode) {
+                        // 多个手指的情况
+                        // 取消长按状态
+                        if (this.longPressTimeout) {
+                            clearTimeout(this.longPressTimeout);
+                        }
 
-                    if (this.props.pinchToZoom) {
                         // 找最小的 x 和最大的 x
                         let minX: number;
                         let maxX: number;
@@ -439,11 +436,43 @@ export default class ImageViewer extends React.Component<Props, State> {
                         }
                         this.zoomLastDistance = this.zoomCurrentDistance;
                     }
+
+                    this.lastPosition = [firstFinderCurrent, secondFinderCurrent];
+                }
+
+                if (evt.nativeEvent.changedTouches.length <= 1) {
+                    // x 位移00
+                    let diffX = gestureState.dx - (this.lastPositionX || 0);
+                    if (this.lastPositionX === null) {
+                        diffX = 0;
+                    }
+                    // y 位移
+                    let diffY = gestureState.dy - (this.lastPositionY || 0);
+                    if (this.lastPositionY === null) {
+                        diffY = 0;
+                    }
+
+                    // 保留这一次位移作为下次的上一次位移
+                    this.lastPositionX = gestureState.dx;
+                    this.lastPositionY = gestureState.dy;
+
+                    this.horizontalWholeCounter += diffX;
+                    this.verticalWholeCounter += diffY;
+
+                    if (Math.abs(this.horizontalWholeCounter) > 5 || Math.abs(this.verticalWholeCounter) > 5) {
+                        // 如果位移超出手指范围，取消长按监听
+                        clearTimeout(this.longPressTimeout);
+                    }
                 }
 
                 this.imageDidMove('onPanResponderMove');
             },
             onPanResponderRelease: (evt, gestureState) => {
+                // tslint:disable-next-line:no-console
+                console.log('release');
+                this.tick = 0;
+                this.isMovingMode = null;
+                this.isPinchToZoomMode = null;
                 // 取消长按
                 if (this.longPressTimeout) {
                     clearTimeout(this.longPressTimeout);
