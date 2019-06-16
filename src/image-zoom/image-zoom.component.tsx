@@ -198,10 +198,8 @@ export default class ImageViewer extends React.Component<Props, State> {
                 }
 
                 if (evt.nativeEvent.changedTouches.length === 2) {
-                    // tslint:disable-next-line:no-console
                     this.tick += 1;
-                    // tslint:disable-next-line:no-console
-                    console.log({ isMoving: this.isMovingMode, pitchToZoom: this.isPinchToZoomMode });
+
                     const [firstFinger, secondFinger] = evt.nativeEvent.changedTouches;
                     const { pageX: pageX1, pageY: pageY1 } = firstFinger;
                     const { pageX: pageX2, pageY: pageY2 } = secondFinger;
@@ -477,7 +475,6 @@ export default class ImageViewer extends React.Component<Props, State> {
             },
             onPanResponderRelease: (evt, gestureState) => {
                 // tslint:disable-next-line:no-console
-                console.log('release');
                 this.tick = 0;
                 this.isMovingMode = null;
                 this.isPinchToZoomMode = null;

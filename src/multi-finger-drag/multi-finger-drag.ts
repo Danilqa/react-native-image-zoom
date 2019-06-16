@@ -14,9 +14,6 @@ export class MultiFingerDrag {
         const delta1 = getDiff(prev1, current1);
         const delta2 = getDiff(prev2, current2);
 
-        // tslint:disable-next-line:no-console
-        console.log({ delta1, delta2 });
-
         const quadrantPlanes1 = getPossibleQuadrantPlanes(delta1);
         const quadrantPlanes2 = getPossibleQuadrantPlanes(delta2);
 
@@ -31,6 +28,7 @@ export class MultiFingerDrag {
         let { x, y } = getDiff(pointA, pointB);
 
         x = Math.abs(x);
+        // noinspection JSSuspiciousNameCombination
         y = Math.abs(y);
 
         return { x, y };
