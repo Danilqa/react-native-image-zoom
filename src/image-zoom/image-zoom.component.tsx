@@ -209,15 +209,6 @@ export default class ImageViewer extends React.Component<Props, State> {
                     const firstFinderCurrent = { x: pageX1, y: pageY1 };
                     const secondFinderCurrent = { x: pageX2, y: pageY2 };
 
-                    const centerPointPrevious = MultiFingerDrag.getCenter(this.lastPosition[0], this.lastPosition[1]);
-                    const centerPointCurrent = MultiFingerDrag.getCenter(firstFinderCurrent, secondFinderCurrent);
-                    const diff = MultiFingerDrag.getDiff(centerPointPrevious, centerPointCurrent);
-
-                    // tslint:disable-next-line:prefer-const
-                    let {x: diffX, y: diffY} = diff;
-
-                    // tslint:disable-next-line:no-console
-                    console.log({tick: this.tick, lastPosition: this.lastPosition});
                     if (this.tick === 2 && this.isMovingMode === null && this.isPinchToZoomMode === null) {
                         const isMovingMode = MultiFingerDrag.isActive(
                             this.lastPosition[0],
@@ -236,7 +227,24 @@ export default class ImageViewer extends React.Component<Props, State> {
                     }
 
                     if (this.isMovingMode) {
+                        let diffX = gestureState.dx - (this.lastPositionX || 0);
+                        if (this.lastPositionX === null) {
+                            diffX = 0;
+                        }
+                        // y 位移
+                        let diffY = gestureState.dy - (this.lastPositionY || 0);
+                        if (this.lastPositionY === null) {
+                            diffY = 0;
+                        }
+
+                        // 保留这一次位移作为下次的上一次位移
+                        this.lastPositionX = gestureState.dx;
+                        this.lastPositionY = gestureState.dy;
+
                         // 处理左右滑，如果正在 swipeDown，左右滑失效
+                        this.horizontalWholeCounter += diffX;
+                        this.verticalWholeCounter += diffY;
+
                         if (this.swipeDownOffset === 0) {
                             if (Math.abs(diffX) > Math.abs(diffY)) {
                                 this.isHorizontalWrap = true;
